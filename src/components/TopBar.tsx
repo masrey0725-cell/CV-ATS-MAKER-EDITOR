@@ -4,9 +4,10 @@ import { FileCheck, Sparkles, Printer } from 'lucide-react';
 interface TopBarProps {
   onPrint: () => void;
   onOpenATS: () => void;
+  onOpenEditor: () => void;
 }
 
-export const TopBar: React.FC<TopBarProps> = ({ onPrint, onOpenATS }) => {
+export const TopBar: React.FC<TopBarProps> = ({ onPrint, onOpenATS, onOpenEditor }) => {
   return (
     <header className="no-print bg-white border-b border-neutral-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-8">
@@ -28,6 +29,12 @@ export const TopBar: React.FC<TopBarProps> = ({ onPrint, onOpenATS }) => {
           >
             Pratinjau CV
           </a>
+          <button
+            onClick={onOpenEditor}
+            className="hover:text-neutral-950 transition-colors whitespace-nowrap shrink-0 cursor-pointer font-semibold text-neutral-900"
+          >
+            Edit Konten
+          </button>
           <button
             onClick={onOpenATS}
             className="hover:text-neutral-950 transition-colors whitespace-nowrap shrink-0 cursor-pointer"

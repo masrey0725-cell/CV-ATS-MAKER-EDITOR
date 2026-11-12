@@ -32,9 +32,23 @@ export interface SkillCategory {
   skills: string;
 }
 
+export interface PhotoSettings {
+  url: string;
+  zoom: number; // 0.5 to 2.5
+  offsetX: number; // -50 to 50
+  offsetY: number; // -50 to 50
+  rotate: number; // 0, 90, 180, 270
+  filter: 'color' | 'grayscale' | 'high-contrast' | 'warm';
+  brightness: number; // 70 to 130
+  contrast: number; // 70 to 130
+  shape: 'rect' | 'rounded' | 'circle';
+  border: 'none' | 'thin' | 'bold';
+}
+
 export interface CVData {
   name: string;
   titleSuffix: string;
+  headline: string;
   contact: {
     phone: string;
     email: string;
@@ -42,7 +56,7 @@ export interface CVData {
     linkedin: string;
     behance: string;
   };
-  photoUrl: string;
+  photoSettings: PhotoSettings;
   summary: string;
   workExperience: WorkExperience[];
   organizationExperience: OrganizationExperience[];
@@ -52,9 +66,23 @@ export interface CVData {
   trainingsAndAchievements: string[];
 }
 
-export const cvData: CVData = {
+export const defaultPhotoSettings: PhotoSettings = {
+  url: "/profile_photo.jpg",
+  zoom: 1,
+  offsetX: 0,
+  offsetY: 0,
+  rotate: 0,
+  filter: "color",
+  brightness: 100,
+  contrast: 100,
+  shape: "rect",
+  border: "thin",
+};
+
+export const defaultCvData: CVData = {
   name: "MUHAMMAD IKHSAN RAIHAN FADILAH",
   titleSuffix: "S.E.",
+  headline: "Ekonomi Syariah · Operasional & Retail · Administrasi Perbankan · Desain Grafis",
   contact: {
     phone: "085695005374",
     email: "mirfikhsan@gmail.com",
@@ -62,7 +90,7 @@ export const cvData: CVData = {
     linkedin: "linkedin.com/in/mirfikhsan",
     behance: "behance.net/mirfikhsan1",
   },
-  photoUrl: "/profile_photo.jpg",
+  photoSettings: defaultPhotoSettings,
   summary:
     "Lulusan S1 Ekonomi Syariah Universitas PTIQ Jakarta (IPK 3,89/4,00, Cum Laude) dengan pengalaman di bidang operasional retail, pelayanan pelanggan, administrasi perbankan, pengelolaan dokumen, transaksi, serta dukungan pemasaran. Memiliki pengalaman tambahan dalam koordinasi organisasi, pengelolaan acara, desain grafis, dan pengembangan konten digital. Terbiasa bekerja secara teliti, mengikuti prosedur, berkomunikasi dengan berbagai pihak, serta mempelajari sistem dan tanggung jawab baru.",
   workExperience: [
@@ -219,3 +247,5 @@ export const cvData: CVData = {
     "Juara 2 MTQ Festival Metode Ummi Tingkat Provinsi Jawa Barat (2017).",
   ],
 };
+
+export const cvData = defaultCvData;

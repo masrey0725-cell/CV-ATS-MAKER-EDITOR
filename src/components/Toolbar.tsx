@@ -1,5 +1,4 @@
-import React from 'react';
-import { Printer, ShieldCheck, FileText, Search, RotateCcw, Image as ImageIcon, SlidersHorizontal } from 'lucide-react';
+import { Printer, ShieldCheck, FileText, Search, RotateCcw, Image as ImageIcon, SlidersHorizontal, Edit3, Crop } from 'lucide-react';
 
 interface ToolbarProps {
   fontStyle: 'sans' | 'serif' | 'hybrid';
@@ -15,7 +14,11 @@ interface ToolbarProps {
   searchKeyword: string;
   setSearchKeyword: (val: string) => void;
   onOpenATSModal: () => void;
+  onOpenEditor: () => void;
+  onOpenPhotoEditor: () => void;
   onPrint: () => void;
+  isCustomized?: boolean;
+  onResetData?: () => void;
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
@@ -32,7 +35,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   searchKeyword,
   setSearchKeyword,
   onOpenATSModal,
+  onOpenEditor,
+  onOpenPhotoEditor,
   onPrint,
+  isCustomized,
+  onResetData,
 }) => {
   return (
     <div className="no-print bg-white border-b border-neutral-200 sticky top-0 z-30 shadow-xs">
@@ -134,6 +141,37 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 Tata Letak: {headerAlign === 'left' ? 'Rata Kiri' : 'Rata Tengah'}
               </button>
             </div>
+
+            {/* Quick Action: Edit Foto Profil */}
+            <button
+              onClick={onOpenPhotoEditor}
+              className="px-2.5 py-1.5 bg-neutral-100 hover:bg-neutral-200 border border-neutral-300 rounded-lg text-neutral-800 font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Buka panel penyesuaian foto (skala, rotasi, filter, ganti foto)"
+            >
+              <Crop className="w-3.5 h-3.5 text-neutral-800" />
+              <span>Edit Foto</span>
+            </button>
+
+            {/* Quick Action: Edit Konten CV */}
+            <button
+              onClick={onOpenEditor}
+              className="px-3 py-1.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg font-medium flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+              title="Edit teks riwayat kerja, kontak, dan keterampilan"
+            >
+              <Edit3 className="w-3.5 h-3.5 text-white" />
+              <span>Edit Isi CV</span>
+            </button>
+
+            {isCustomized && onResetData && (
+              <button
+                onClick={onResetData}
+                className="px-2 py-1 text-neutral-500 hover:text-red-600 font-medium text-[11px] flex items-center gap-1"
+                title="Kembalikan semua teks & foto ke dokumen PDF asli"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>Reset Asli</span>
+              </button>
+            )}
           </div>
 
           {/* Search & Actions */}
@@ -161,7 +199,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             {/* ATS Audit Trigger */}
             <button
               onClick={onOpenATSModal}
-              className="px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-medium rounded-lg border border-neutral-200 flex items-center gap-1.5 transition-colors"
+              className="px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-medium rounded-lg border border-neutral-200 flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
               <span className="hidden sm:inline">Cek ATS</span>
@@ -170,7 +208,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             {/* Print / Save PDF Primary CTA */}
             <button
               onClick={onPrint}
-              className="px-4 py-1.5 bg-neutral-950 hover:bg-neutral-800 text-white text-xs font-medium rounded-lg shadow-sm flex items-center gap-1.5 transition-colors shrink-0"
+              className="px-4 py-1.5 bg-neutral-950 hover:bg-neutral-800 text-white text-xs font-medium rounded-lg shadow-sm flex items-center gap-1.5 transition-colors shrink-0 cursor-pointer"
             >
               <Printer className="w-3.5 h-3.5" />
               <span>Cetak / Unduh PDF</span>

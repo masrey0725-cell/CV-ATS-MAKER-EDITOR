@@ -10,6 +10,8 @@ interface CVDocumentProps {
   photoStyle: 'color' | 'grayscale';
   headerAlign: 'left' | 'center';
   searchKeyword?: string;
+  onOpenPhotoEditor?: () => void;
+  onOpenContentEditor?: () => void;
 }
 
 export const CVDocument: React.FC<CVDocumentProps> = ({
@@ -20,6 +22,8 @@ export const CVDocument: React.FC<CVDocumentProps> = ({
   photoStyle,
   headerAlign,
   searchKeyword = '',
+  onOpenPhotoEditor,
+  onOpenContentEditor,
 }) => {
   // Helper to highlight matching text
   const highlightText = (text: string) => {
@@ -67,6 +71,30 @@ export const CVDocument: React.FC<CVDocumentProps> = ({
           titleSize: 'text-[26px]',
         };
 
+  const photo = data.photoSettings;
+  const photoFilter =
+    photoStyle === 'grayscale' || photo?.filter === 'grayscale'
+      ? `brightness(${photo?.brightness ?? 100}%) contrast(${photo?.contrast ?? 100}%) grayscale(100%)`
+      : photo?.filter === 'high-contrast'
+      ? `brightness(${photo?.brightness ?? 100}%) contrast(${Math.max(photo?.contrast ?? 100, 130)}%) grayscale(100%)`
+      : photo?.filter === 'warm'
+      ? `brightness(${photo?.brightness ?? 100}%) contrast(${photo?.contrast ?? 100}%) sepia(35%)`
+      : `brightness(${photo?.brightness ?? 100}%) contrast(${photo?.contrast ?? 100}%)`;
+
+  const shapeClass =
+    photo?.shape === 'circle'
+      ? 'w-24 h-24 md:w-28 md:h-28 rounded-full'
+      : photo?.shape === 'rounded'
+      ? 'w-24 h-32 md:w-28 md:h-36 rounded-xl'
+      : 'w-24 h-32 md:w-28 md:h-36 rounded-none';
+
+  const borderClass =
+    photo?.border === 'bold'
+      ? 'border-2 border-neutral-900'
+      : photo?.border === 'thin'
+      ? 'border border-neutral-900'
+      : 'border-none';
+
   return (
     <article
       id="cv-printable-document"
@@ -93,7 +121,7 @@ export const CVDocument: React.FC<CVDocumentProps> = ({
 
           {/* Subtitle / Professional Title line */}
           <p className="text-xs uppercase tracking-widest text-neutral-600 font-medium mt-1">
-            Ekonomi Syariah · Operasional & Retail · Administrasi Perbankan · Desain Grafis
+            {highlightText(data.headline || 'Ekonomi Syariah · Operasional & Retail · Administrasi Perbankan · Desain Grafis')}
           </p>
 
           {/* Contact Details with ATS-safe semantic text and clickable links */}
@@ -156,19 +184,31 @@ export const CVDocument: React.FC<CVDocumentProps> = ({
         {/* Optional Profile Photo - ATS mode allows hiding or showing */}
         {showPhoto && (
           <div className="shrink-0 self-center md:self-auto flex flex-col items-center">
-            <div className="relative w-24 h-32 md:w-28 md:h-36 overflow-hidden border border-neutral-900 bg-neutral-100 shadow-sm">
+            <div
+              onClick={onOpenPhotoEditor}
+              className={`relative overflow-hidden bg-neutral-100 shadow-sm cursor-pointer group ${shapeClass} ${borderClass}`}
+              title="Klik untuk membuka Editor Foto Profil"
+            >
               <img
-                src={data.photoUrl}
+                src={photo?.url || '/profile_photo.jpg'}
                 alt={data.name}
                 referrerPolicy="no-referrer"
-                className={`w-full h-full object-cover object-center ${
-                  photoStyle === 'grayscale' ? 'grayscale contrast-110' : ''
-                }`}
+                style={{
+                  transform: `translate(${photo?.offsetX ?? 0}%, ${photo?.offsetY ?? 0}%) scale(${photo?.zoom ?? 1}) rotate(${photo?.rotate ?? 0}deg)`,
+                  filter: photoFilter,
+                }}
+                className="w-full h-full object-cover object-center select-none"
               />
+              <div className="no-print absolute inset-0 bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[10px] font-semibold text-center p-1">
+                Edit Foto ✎
+              </div>
             </div>
-            <span className="text-[10px] text-neutral-500 mt-1 print:hidden font-mono">
-              Foto Formal
-            </span>
+            <button
+              onClick={onOpenPhotoEditor}
+              className="no-print text-[10px] text-neutral-500 hover:text-black mt-1 font-mono underline decoration-neutral-300 hover:decoration-black cursor-pointer"
+            >
+              Ubah Foto
+            </button>
           </div>
         )}
       </header>
