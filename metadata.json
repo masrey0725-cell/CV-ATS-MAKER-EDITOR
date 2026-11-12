@@ -1,0 +1,6 @@
+{
+  "name": "CV Modern ATS - Muhammad Ikhsan Raihan Fadilah, S.E.",
+  "description": "Desain CV modern monokrom (hitam-putih), elegan, mudah dibaca, dan 100% ramah ATS dengan ekspor PDF siap cetak.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
