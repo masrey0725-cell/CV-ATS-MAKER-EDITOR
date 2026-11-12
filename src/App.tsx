@@ -6,6 +6,7 @@ import { Toolbar } from './components/Toolbar';
 import { ATSInspectorModal } from './components/ATSInspectorModal';
 import { PhotoEditorModal } from './components/PhotoEditorModal';
 import { CVEditorDrawer } from './components/CVEditorDrawer';
+import { LoginScreen } from './components/LoginScreen';
 import {
   Check,
   Info,
@@ -21,15 +22,27 @@ import {
 } from 'lucide-react';
 
 const STORAGE_KEY = 'cv_ats_custom_data_v2';
+const AUTH_SESSION_KEY = 'cv_owner_auth_session';
+const AUTH_REMEMBER_KEY = 'cv_owner_auth_remember';
 
 export default function App() {
+  // Authentication state
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    try {
+      const session = sessionStorage.getItem(AUTH_SESSION_KEY);
+      const remember = localStorage.getItem(AUTH_REMEMBER_KEY);
+      return session === 'true' || remember === 'true';
+    } catch {
+      return false;
+    }
+  });
+
   // Load saved CV data or default
   const [data, setData] = useState<CVData>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        // Ensure photoSettings exists
         if (!parsed.photoSettings) {
           parsed.photoSettings = defaultCvData.photoSettings;
         }
@@ -57,6 +70,31 @@ export default function App() {
 
   // Check if current data has been modified compared to default
   const isCustomized = JSON.stringify(data) !== JSON.stringify(defaultCvData);
+
+  const handleLoginSuccess = (rememberMe: boolean) => {
+    try {
+      sessionStorage.setItem(AUTH_SESSION_KEY, 'true');
+      if (rememberMe) {
+        localStorage.setItem(AUTH_REMEMBER_KEY, 'true');
+      } else {
+        localStorage.removeItem(AUTH_REMEMBER_KEY);
+      }
+    } catch (e) {
+      console.error('Session storage error:', e);
+    }
+    setIsAuthenticated(true);
+    showToast('Akses berhasil dibuka. Selamat datang!');
+  };
+
+  const handleLogout = () => {
+    try {
+      sessionStorage.removeItem(AUTH_SESSION_KEY);
+      localStorage.removeItem(AUTH_REMEMBER_KEY);
+    } catch (e) {
+      console.error('Storage error during logout:', e);
+    }
+    setIsAuthenticated(false);
+  };
 
   const showToast = (message: string) => {
     setNotification(message);
@@ -103,6 +141,11 @@ export default function App() {
     window.print();
   };
 
+  // If user is not authenticated, show password lock screen
+  if (!isAuthenticated) {
+    return <LoginScreen onLoginSuccess={handleLoginSuccess} />;
+  }
+
   return (
     <div className="min-h-screen bg-neutral-100 flex flex-col text-neutral-900 selection:bg-neutral-900 selection:text-white">
       {/* Toast Notification */}
@@ -118,6 +161,7 @@ export default function App() {
         onPrint={handlePrint}
         onOpenATS={() => setIsATSModalOpen(true)}
         onOpenEditor={() => setIsEditorOpen(true)}
+        onLogout={handleLogout}
       />
 
       {/* Interactive Customization Toolbar */}
@@ -310,7 +354,7 @@ export default function App() {
 
               <div className="pt-2 text-center">
                 <a
-                  href="/public/assets/aistudio/Master_CV_Muhammad_Ikhsan_Raihan_Fadilah_c7947c6c.pdf"
+                  href="/assets/aistudio/Master_CV_Muhammad_Ikhsan_Raihan_Fadilah_c7947c6c.pdf"
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-1.5 text-xs text-neutral-700 hover:text-black underline underline-offset-4"

@@ -5,9 +5,10 @@ interface TopBarProps {
   onPrint: () => void;
   onOpenATS: () => void;
   onOpenEditor: () => void;
+  onLogout?: () => void;
 }
 
-export const TopBar: React.FC<TopBarProps> = ({ onPrint, onOpenATS, onOpenEditor }) => {
+export const TopBar: React.FC<TopBarProps> = ({ onPrint, onOpenATS, onOpenEditor, onLogout }) => {
   return (
     <header className="no-print bg-white border-b border-neutral-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-8">
@@ -60,7 +61,17 @@ export const TopBar: React.FC<TopBarProps> = ({ onPrint, onOpenATS, onOpenEditor
         </nav>
 
         {/* Zone 3: 1 primary action */}
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0">
+          {onLogout && (
+            <button
+              onClick={onLogout}
+              className="px-2.5 py-1.5 text-xs font-medium text-neutral-600 hover:text-neutral-950 hover:bg-neutral-100 rounded-lg transition-colors whitespace-nowrap shrink-0 flex items-center gap-1 cursor-pointer border border-neutral-200"
+              title="Kunci kembali akses CV dengan password"
+            >
+              <span>Kunci Akses</span>
+            </button>
+          )}
+
           <button
             onClick={onPrint}
             className="px-3.5 py-1.5 text-xs font-medium text-white bg-neutral-950 rounded-lg hover:bg-neutral-800 transition-colors whitespace-nowrap shrink-0 flex items-center gap-1.5 cursor-pointer shadow-xs"
