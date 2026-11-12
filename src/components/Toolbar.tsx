@@ -1,4 +1,17 @@
-import { Printer, ShieldCheck, FileText, Search, RotateCcw, Image as ImageIcon, SlidersHorizontal, Edit3, Crop } from 'lucide-react';
+import {
+  Printer,
+  ShieldCheck,
+  FileText,
+  Search,
+  RotateCcw,
+  Image as ImageIcon,
+  SlidersHorizontal,
+  Edit3,
+  Crop,
+  Download,
+  FileCode,
+  Loader2,
+} from 'lucide-react';
 
 interface ToolbarProps {
   fontStyle: 'sans' | 'serif' | 'hybrid';
@@ -16,7 +29,11 @@ interface ToolbarProps {
   onOpenATSModal: () => void;
   onOpenEditor: () => void;
   onOpenPhotoEditor: () => void;
+  onDownloadPDF: () => void;
+  onDownloadWord: () => void;
   onPrint: () => void;
+  isExportingPDF?: boolean;
+  isExportingWord?: boolean;
   isCustomized?: boolean;
   onResetData?: () => void;
 }
@@ -37,7 +54,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onOpenATSModal,
   onOpenEditor,
   onOpenPhotoEditor,
+  onDownloadPDF,
+  onDownloadWord,
   onPrint,
+  isExportingPDF = false,
+  isExportingWord = false,
   isCustomized,
   onResetData,
 }) => {
@@ -199,19 +220,54 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             {/* ATS Audit Trigger */}
             <button
               onClick={onOpenATSModal}
-              className="px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-medium rounded-lg border border-neutral-200 flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="px-2.5 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-medium rounded-lg border border-neutral-200 flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
               <span className="hidden sm:inline">Cek ATS</span>
             </button>
 
-            {/* Print / Save PDF Primary CTA */}
+            {/* Direct Word (.docx) Download */}
+            <button
+              onClick={onDownloadWord}
+              disabled={isExportingWord}
+              className="px-3 py-1.5 bg-white hover:bg-neutral-50 text-neutral-900 text-xs font-semibold rounded-lg border border-neutral-300 shadow-2xs flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+              title="Unduh dokumen format Microsoft Word (.docx) resmi yang dapat diedit langsung"
+            >
+              {isExportingWord ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <FileText className="w-3.5 h-3.5 text-blue-700" />
+              )}
+              <span>Unduh Word (.docx)</span>
+            </button>
+
+            {/* Direct High-Res PDF Download */}
+            <button
+              onClick={onDownloadPDF}
+              disabled={isExportingPDF}
+              className="px-3.5 py-1.5 bg-neutral-950 hover:bg-neutral-800 text-white text-xs font-semibold rounded-lg shadow-sm flex items-center gap-1.5 transition-colors shrink-0 cursor-pointer disabled:opacity-60"
+              title="Unduh langsung file PDF A4 berkualitas tinggi (tanpa perlu dialog print browser)"
+            >
+              {isExportingPDF ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Membuat PDF...</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Unduh PDF Langsung</span>
+                </>
+              )}
+            </button>
+
+            {/* Print Fallback Button */}
             <button
               onClick={onPrint}
-              className="px-4 py-1.5 bg-neutral-950 hover:bg-neutral-800 text-white text-xs font-medium rounded-lg shadow-sm flex items-center gap-1.5 transition-colors shrink-0 cursor-pointer"
+              className="p-1.5 text-neutral-600 hover:text-black hover:bg-neutral-100 rounded-lg border border-neutral-200 transition-colors cursor-pointer"
+              title="Cetak via dialog browser / Printer fisik"
             >
               <Printer className="w-3.5 h-3.5" />
-              <span>Cetak / Unduh PDF</span>
             </button>
           </div>
         </div>

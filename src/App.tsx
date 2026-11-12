@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { CVData, PhotoSettings, defaultCvData } from './data/cvData';
 import { CVDocument } from './components/CVDocument';
 import { TopBar } from './components/TopBar';
@@ -7,6 +7,8 @@ import { ATSInspectorModal } from './components/ATSInspectorModal';
 import { PhotoEditorModal } from './components/PhotoEditorModal';
 import { CVEditorDrawer } from './components/CVEditorDrawer';
 import { LoginScreen } from './components/LoginScreen';
+import { downloadDirectPDF } from './utils/pdfExport';
+import { downloadDocx } from './utils/docxExport';
 import {
   Check,
   Info,
@@ -19,6 +21,8 @@ import {
   Edit3,
   Crop,
   CheckCircle,
+  Loader2,
+  Printer,
 } from 'lucide-react';
 
 const STORAGE_KEY = 'cv_ats_custom_data_v2';
@@ -68,6 +72,10 @@ export default function App() {
   const [isPhotoEditorOpen, setIsPhotoEditorOpen] = useState<boolean>(false);
   const [notification, setNotification] = useState<string | null>(null);
 
+  // Direct export loading states
+  const [isExportingPDF, setIsExportingPDF] = useState<boolean>(false);
+  const [isExportingWord, setIsExportingWord] = useState<boolean>(false);
+
   // Check if current data has been modified compared to default
   const isCustomized = JSON.stringify(data) !== JSON.stringify(defaultCvData);
 
@@ -100,7 +108,7 @@ export default function App() {
     setNotification(message);
     setTimeout(() => {
       setNotification(null);
-    }, 3000);
+    }, 3500);
   };
 
   const handleSaveCVData = (newData: CVData) => {
@@ -137,6 +145,34 @@ export default function App() {
     }
   };
 
+  // Direct PDF Download (Pixel-perfect high resolution A4 PDF)
+  const handleDownloadDirectPDF = async () => {
+    try {
+      showToast('Memproses file PDF resolusi tinggi A4...');
+      await downloadDirectPDF('cv-printable-document', data.name, setIsExportingPDF);
+      showToast('File PDF resmi berhasil diunduh ke komputer!');
+    } catch (err) {
+      console.error('Direct PDF error:', err);
+      showToast('Gagal membuat PDF otomatis, beralih ke dialog cetak...');
+      window.print();
+    }
+  };
+
+  // Direct Word (.docx) Download
+  const handleDownloadDirectWord = async () => {
+    try {
+      setIsExportingWord(true);
+      showToast('Membuat file Microsoft Word (.docx)...');
+      await downloadDocx(data);
+      showToast('File Word (.docx) siap diedit berhasil diunduh!');
+    } catch (err) {
+      console.error('Direct Word error:', err);
+      showToast('Gagal membuat file Word.');
+    } finally {
+      setIsExportingWord(false);
+    }
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -161,6 +197,8 @@ export default function App() {
         onPrint={handlePrint}
         onOpenATS={() => setIsATSModalOpen(true)}
         onOpenEditor={() => setIsEditorOpen(true)}
+        onDownloadPDF={handleDownloadDirectPDF}
+        onDownloadWord={handleDownloadDirectWord}
         onLogout={handleLogout}
       />
 
@@ -181,7 +219,11 @@ export default function App() {
         onOpenATSModal={() => setIsATSModalOpen(true)}
         onOpenEditor={() => setIsEditorOpen(true)}
         onOpenPhotoEditor={() => setIsPhotoEditorOpen(true)}
+        onDownloadPDF={handleDownloadDirectPDF}
+        onDownloadWord={handleDownloadDirectWord}
         onPrint={handlePrint}
+        isExportingPDF={isExportingPDF}
+        isExportingWord={isExportingWord}
         isCustomized={isCustomized}
         onResetData={handleResetData}
       />
@@ -210,7 +252,7 @@ export default function App() {
                 )}
               </div>
               <p className="text-xs text-neutral-600 mt-1 leading-relaxed max-w-3xl">
-                Gunakan tombol <strong>Edit Isi CV</strong> untuk mengubah nama/pekerjaan atau <strong>Edit Foto</strong> untuk memotong, memperbesar (zoom), memutar, dan mengganti pas foto sesuai standar lamaran kerja Anda.
+                Unduh langsung CV Anda dalam format <strong>PDF Resolusi Tinggi (A4)</strong> atau <strong>Microsoft Word (.docx)</strong> yang dapat diedit langsung di komputer/HP Anda.
               </p>
             </div>
           </div>
@@ -227,27 +269,46 @@ export default function App() {
 
             <button
               onClick={() => setIsEditorOpen(true)}
-              className="px-3.5 py-1.5 text-xs font-medium border border-neutral-900 bg-white hover:bg-neutral-50 text-neutral-950 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+              className="px-3 py-1.5 text-xs font-medium border border-neutral-900 bg-white hover:bg-neutral-50 text-neutral-950 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
               title="Edit semua teks dan riwayat CV"
             >
               <Edit3 className="w-3.5 h-3.5 text-neutral-900" />
-              <span>Edit Teks CV</span>
+              <span>Edit Teks</span>
             </button>
 
+            {/* Direct Word (.docx) Download Button */}
             <button
-              onClick={() => setShowOriginalModal(true)}
-              className="px-3 py-1.5 text-xs font-medium border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors flex items-center justify-center gap-1.5 text-neutral-800 cursor-pointer"
+              onClick={handleDownloadDirectWord}
+              disabled={isExportingWord}
+              className="px-3.5 py-1.5 text-xs font-semibold bg-white hover:bg-blue-50 text-blue-900 border border-blue-200 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-2xs"
+              title="Unduh dokumen format Microsoft Word (.docx) resmi"
             >
-              <Eye className="w-3.5 h-3.5 text-neutral-500" />
-              <span>Bandingkan Asli</span>
+              {isExportingWord ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <FileText className="w-3.5 h-3.5 text-blue-700" />
+              )}
+              <span>Unduh Word (.docx)</span>
             </button>
 
+            {/* Direct High-Res PDF Download Button */}
             <button
-              onClick={handlePrint}
-              className="px-4 py-1.5 text-xs font-medium bg-neutral-950 hover:bg-neutral-800 text-white rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+              onClick={handleDownloadDirectPDF}
+              disabled={isExportingPDF}
+              className="px-4 py-1.5 text-xs font-semibold bg-neutral-950 hover:bg-neutral-800 text-white rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs disabled:opacity-60"
+              title="Unduh langsung file PDF A4 berkualitas tinggi"
             >
-              <Download className="w-3.5 h-3.5" />
-              <span>Cetak / Unduh PDF</span>
+              {isExportingPDF ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Membuat PDF...</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Unduh PDF Langsung</span>
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -272,15 +333,23 @@ export default function App() {
           <div className="flex items-center gap-2">
             <Info className="w-4 h-4 text-neutral-500 shrink-0" />
             <span>
-              <strong>Petunjuk Cetak PDF:</strong> Gunakan Destination <em>Save as PDF</em>, Paper Size <em>A4</em>, Margins <em>Default / None</em>, dan aktifkan <em>Background graphics</em>.
+              <strong>Pilihan Unduh:</strong> Klik <em>Unduh PDF Langsung</em> untuk file PDF A4 tajam tanpa dialog cetak browser, atau <em>Unduh Word (.docx)</em> untuk file dokumen Microsoft Word resmi.
             </span>
           </div>
-          <button
-            onClick={handlePrint}
-            className="px-3 py-1 border border-neutral-300 rounded font-medium text-neutral-800 hover:bg-neutral-50 whitespace-nowrap cursor-pointer"
-          >
-            Buka Dialog Cetak
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={handleDownloadDirectWord}
+              className="px-3 py-1 border border-neutral-300 rounded font-medium text-neutral-800 hover:bg-neutral-50 whitespace-nowrap cursor-pointer text-xs"
+            >
+              Unduh .docx
+            </button>
+            <button
+              onClick={handleDownloadDirectPDF}
+              className="px-3 py-1 bg-neutral-950 text-white rounded font-medium hover:bg-neutral-800 whitespace-nowrap cursor-pointer text-xs"
+            >
+              Unduh .pdf
+            </button>
+          </div>
         </div>
       </main>
 
@@ -346,8 +415,8 @@ export default function App() {
                     <li>Palet monokrom hitam-putih murni, elegan, berwibawa, dan 100% ATS friendly.</li>
                     <li>Hierarki tipografi proporsional dengan garis pembatas hairline 1px tegas.</li>
                     <li>Perlindungan page break (<code className="text-neutral-300 font-mono">break-inside-avoid</code>) sehingga seksi dan entri pekerjaan tidak terpotong canggung.</li>
-                    <li>Fitur <strong>Live Editor</strong> untuk mengubah teks, menambah riwayat kerja, dan mengedit pas foto secara fleksibel.</li>
-                    <li>Dukungan ekspor cetak PDF A4 langsung dengan satu klik.</li>
+                    <li>Fitur <strong>Unduh PDF Langsung</strong> resolusi tinggi & <strong>Unduh Word (.docx)</strong> asli.</li>
+                    <li>Fitur <strong>Live Editor</strong> untuk teks dan foto.</li>
                   </ul>
                 </div>
               </div>
